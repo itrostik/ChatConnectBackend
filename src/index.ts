@@ -1,13 +1,15 @@
-import express from "express";
+import express, {Request, Response} from "express";
+import usersRoute from "./routes/user.route";
 
 const app = express();
 
 app.use(express.json());
+app.use("/api", usersRoute);
 
-app.get("/", (req, res) => {
-  res.send("123");
+app.get("/", (req: Request, res: Response) => {
+  res.redirect("/api");
 });
 
 app.listen(4444, () => {
-  console.log("Hello Express.js");
+  console.log("SERVER OK")
 });
