@@ -11,8 +11,8 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use("/api", usersRoute);
-app.use("/api", dialogsRoute)
-app.use("/api", messagesRoute)
+app.use("/api/", usersRoute);
+app.use("/api/", dialogsRoute)
+app.use("/api/", messagesRoute)
 
 export const handler = serverless(app);
