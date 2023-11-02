@@ -1,4 +1,4 @@
-import database from "../database";
+import database from "../utils/database";
 import {Request, Response} from "express";
 
 class UserController {
