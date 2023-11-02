@@ -24,7 +24,6 @@
     "firebase": "^10.4.0",
     "googleapis": "^126.0.1",
     "gray-matter": "^4.0.3",
-    "netlify-cli": "^17.0.0",
     "pg": "^8.11.3",
     "serverless-http": "^3.2.0"
   }
