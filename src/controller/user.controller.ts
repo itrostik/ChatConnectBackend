@@ -71,19 +71,26 @@ class UserController {
 
   async checkUser(req: Request, res: Response) {
     const { login, password } = req.body;
-    const user = await database.query("select * from users where login = $1", [
-      login,
-    ]);
-    const userPasswordHash = user.rows[0]["password_hash"];
-    if (await checkPassword(password, userPasswordHash)) {
+    try{
+      const user = await database.query("select * from users where login = $1", [
+        login,
+      ]);
+      const userPasswordHash = user.rows[0]["password_hash"];
+      if (await checkPassword(password, userPasswordHash)) {
+        res.json({
+          ...user.rows[0],
+          password,
+        });
+      } else {
+        res.json({
+          message: "неверный логин или пароль",
+        });
+      }
+    }
+    catch (err) {
       res.json({
-        ...user.rows[0],
-        password,
-      });
-    } else {
-      res.json({
-        message: "пользователь неверный",
-      });
+        message: "неверный логин или пароль",
+      })
     }
   }
 }
