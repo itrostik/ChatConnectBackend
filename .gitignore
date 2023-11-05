@@ -1,0 +1,8 @@
+node_modules
+.idea
+.env
+# Local Netlify folder
+
+.eslintrc.cjs
+vite.config.ts
+src/vite-env.d.ts
