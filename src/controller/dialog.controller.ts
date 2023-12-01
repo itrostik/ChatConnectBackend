@@ -1,30 +1,66 @@
 import database from "../utils/database";
-import {Request, Response} from "express";
+import { Request, Response } from "express";
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  DocumentData,
+  getDoc,
+  getDocs,
+  query,
+  where,
+} from "firebase/firestore";
 
 class DialogController {
   async createDialog(req: Request, res: Response) {
-    const {user_id, user2_id} = req.body;
-    const newDialog = await database.query('insert into dialogs (user_id, user2_id) values ($1, $2) returning *', [user_id, user2_id])
-    res.json(newDialog.rows[0])
+    const { user_id, user2_id } = req.body;
+    const docRef = await addDoc(collection(database, "dialogs"), {
+      user_id,
+      user2_id,
+      messages: [],
+    });
+    const docSnap = await getDoc(docRef);
+    const dialog = {
+      ...docSnap.data(),
+      id: docRef.id,
+    };
+    res.json({
+      dialog,
+    });
   }
 
   async getDialogsByUserId(req: Request, res: Response) {
-    const user_id = req.params.id
-    const dialogs = await database.query("select * from dialogs where user_id = $1 OR user2_id = $1", [user_id])
-    res.json(dialogs.rows)
+    const user_id = req.params.id;
+    const q = query(
+      collection(database, "dialogs"),
+      where("user_id", "in", [user_id]),
+      where("user2_id", "==", user_id),
+    );
+    const userSnapshot = await getDocs(q);
+    console.log(userSnapshot);
+    res.json(userSnapshot.size);
   }
 
   async getDialogs(req: Request, res: Response) {
-    const dialogs = await database.query("select * from dialogs")
-    res.json(dialogs.rows)
+    const dialogsList = await getDocs(collection(database, "dialogs"));
+    const dialogs: DocumentData[] = [];
+    dialogsList.forEach((dialog) => {
+      dialogs.push(dialog.data());
+    });
+    if (dialogsList) {
+      res.json({ data: dialogs });
+    } else {
+      console.log("No such document!");
+    }
   }
 
   async getDialog(req: Request, res: Response) {
     const dialog_id = req.params.id;
-    const dialog = await database.query("select * from dialogs where id = $1", [dialog_id])
-    res.json(dialog.rows[0])
+    const dialogRef = doc(database, "dialogs", dialog_id);
+    const docSnap = await getDoc(dialogRef);
+    res.json({ ...docSnap.data() });
   }
-
 
   // Возможно будет добавление диалога в избранное, поэтому этот метод закомментирован
 
@@ -36,8 +72,16 @@ class DialogController {
 
   async deleteDialog(req: Request, res: Response) {
     const dialog_id = req.params.id;
-    const dialog = await database.query("DELETE from dialogs where id = $1 returning *", [dialog_id])
-    res.json(dialog.rows[0])
+    try {
+      await deleteDoc(doc(database, "dialogs", dialog_id));
+      res.json({
+        message: "Удаление прошло успешно",
+      });
+    } catch (e) {
+      res.json({
+        message: "Что-то пошло не так при удалении...",
+      });
+    }
   }
 }
 
