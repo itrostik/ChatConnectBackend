@@ -17,9 +17,15 @@ import { getToken } from "../utils/jwt";
 
 class UserController {
   async createUser(req: Request, res: Response) {
-    const { firstName, lastName, username, login, password } = req.body;
+    const { firstName, lastName, username, login, password, avatarUrl } =
+      req.body;
+    let avatar = avatarUrl;
     const q = query(collection(database, "users"), where("login", "==", login));
     const userSnapshot = await getDocs(q);
+    if (avatar === "") {
+      avatar =
+        "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png";
+    }
     if (userSnapshot.empty) {
       const passwordHash = await hashPassword(password);
       try {
@@ -29,6 +35,7 @@ class UserController {
           username,
           login,
           passwordHash,
+          avatar,
         });
         const docSnap = await getDoc(docRef);
         const user = {
