@@ -13,6 +13,7 @@ import {
   deleteDoc,
   setDoc,
 } from "firebase/firestore";
+import { getToken } from "../utils/jwt";
 
 class UserController {
   async createUser(req: Request, res: Response) {
@@ -34,8 +35,9 @@ class UserController {
           ...docSnap.data(),
           id: docRef.id,
         };
+        const token = getToken(user);
         res.json({
-          user,
+          token,
         });
       } catch (error) {
         res.json({
