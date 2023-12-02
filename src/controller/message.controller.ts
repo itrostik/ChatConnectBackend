@@ -1,18 +1,29 @@
 import database from "../utils/database";
 import { Request, Response } from "express";
-import { addDoc, collection, getDoc, doc, setDoc } from "firebase/firestore";
+import { getDoc, doc, setDoc } from "firebase/firestore";
+
+type Message = {
+  id: string;
+  sender_id: string;
+  messageText: string;
+};
 
 class MessageController {
   async createMessage(req: Request, res: Response) {
-    const { dialog_id, sender_id, recipient_id, messageText } = req.body;
+    const { dialog_id, sender_id, messageText } = req.body;
     const docRef = doc(database, "dialogs", dialog_id);
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
       const messagesList = docSnap.data().messages;
-      messagesList.push(messageText);
-      const messageSnap = await setDoc(docRef, {
+      const message = {
+        messageText,
+        id: Math.random().toString(16).slice(2),
         sender_id,
-        recipient_id,
+      };
+      messagesList.push(message);
+      console.log(docSnap.data());
+      const messageSnap = await setDoc(docRef, {
+        ...docSnap.data(),
         messages: messagesList,
       });
       const docSnapBuf = await getDoc(docRef);
@@ -26,54 +37,60 @@ class MessageController {
     }
   }
 
-  async getMessagesByUserId(req: Request, res: Response) {
-    const sender_id = req.params.id;
-    const messages = await database.query(
-      "select * from messages where sender_id = $1",
-      [sender_id],
-    );
-    res.json(messages.rows);
-  }
-
   async getMessagesByDialogId(req: Request, res: Response) {
     const dialog_id = req.params.id;
-    const messages = await database.query(
-      "select * from messages where dialog_id = $1",
-      [dialog_id],
-    );
-    res.json(messages.rows);
-  }
-
-  async getMessages(_req: Request, res: Response) {
-    const messages = await database.query("select * from messages");
-    res.json(messages.rows);
-  }
-
-  async getMessage(req: Request, res: Response) {
-    const message_id = req.params.id;
-    const message = await database.query(
-      "select * from messages where id = $1",
-      [message_id],
-    );
-    res.json(message.rows[0]);
+    const docRef = doc(database, "dialogs", dialog_id);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      const messages = docSnap.data().messages;
+      res.json({ data: messages });
+    }
   }
 
   async updateMessage(req: Request, res: Response) {
-    const { textMessage, id } = req.body;
-    const message = await database.query(
-      "update messages set text_message = $1 where id = $2 returning *",
-      [textMessage, id],
-    );
-    res.json(message.rows[0]);
+    const { messageText, dialog_id, message_id } = req.body;
+    const docRef = doc(database, "dialogs", dialog_id);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      const messages = docSnap.data().messages;
+      messages.forEach((message: Message) => {
+        if (message.id === message_id) {
+          message.messageText = messageText;
+        }
+      });
+      await setDoc(docRef, {
+        ...docSnap.data(),
+        messages,
+      });
+    }
+    const newDocSnap = await getDoc(docRef);
+    res.json({
+      ...newDocSnap.data(),
+    });
   }
-
   async deleteMessage(req: Request, res: Response) {
-    const message_id = req.params.id;
-    const message = await database.query(
-      "DELETE from messages where id = $1 returning *",
-      [message_id],
-    );
-    res.json(message.rows[0]);
+    const { message_id, dialog_id } = req.body;
+    try {
+      const docRef = doc(database, "dialogs", dialog_id);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        const messages = docSnap.data().messages;
+        const newMessages = messages.filter(
+          (message: Message) => message.id !== message_id,
+        );
+        await setDoc(docRef, {
+          ...docSnap.data(),
+          messages: newMessages,
+        });
+        res.json({
+          message: "Удаление прошло успешно",
+        });
+      }
+    } catch (e) {
+      res.json({
+        message: "Что-то пошло не так при удалении...",
+      });
+    }
   }
 }
 
