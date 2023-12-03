@@ -19,9 +19,9 @@ class MessageController {
         messageText,
         id: Math.random().toString(16).slice(2),
         sender_id,
+        created: Date.now(),
       };
       messagesList.push(message);
-      console.log(docSnap.data());
       const messageSnap = await setDoc(docRef, {
         ...docSnap.data(),
         messages: messagesList,
