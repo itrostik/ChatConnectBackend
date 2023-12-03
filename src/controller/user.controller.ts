@@ -120,8 +120,9 @@ class UserController {
         userSnapshot.forEach(async (doc) => {
           const user = doc.data();
           if (await checkPassword(password, user.passwordHash)) {
+            const token = getToken(user);
             res.json({
-              ...user,
+              token,
             });
           } else {
             res.json({
