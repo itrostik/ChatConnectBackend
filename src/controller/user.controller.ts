@@ -19,12 +19,8 @@ class UserController {
   async createUser(req: Request, res: Response) {
     const { firstName, lastName, username, login, password, avatarUrl } =
       req.body;
-    let avatar = avatarUrl;
     const q = query(collection(database, "users"), where("login", "==", login));
     const userSnapshot = await getDocs(q);
-    if (avatar === "") {
-      avatar = "https://cdn-icons-png.flaticon.com/512/552/552721.png";
-    }
     if (userSnapshot.empty) {
       const passwordHash = await hashPassword(password);
       try {
@@ -34,7 +30,7 @@ class UserController {
           username,
           login,
           passwordHash,
-          avatar,
+          avatarUrl,
         });
         const docSnap = await getDoc(docRef);
         const user = {
