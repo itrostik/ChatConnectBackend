@@ -23,8 +23,7 @@ class UserController {
     const q = query(collection(database, "users"), where("login", "==", login));
     const userSnapshot = await getDocs(q);
     if (avatar === "") {
-      avatar =
-        "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png";
+      avatar = "https://cdn-icons-png.flaticon.com/512/552/552721.png";
     }
     if (userSnapshot.empty) {
       const passwordHash = await hashPassword(password);
@@ -47,12 +46,12 @@ class UserController {
           token,
         });
       } catch (error) {
-        res.json({
+        res.status(400).json({
           message: "Произошла ошибка при регистрации",
         });
       }
     } else {
-      res.json({
+      res.status(400).json({
         message: "Такой пользователь уже есть в системе",
       });
     }
