@@ -60,7 +60,7 @@ class UserController {
       users.push(user.data());
     });
     if (userList) {
-      res.json({ data: users });
+      res.json(users);
     } else {
       console.log("No such document!");
     }
