@@ -9,7 +9,9 @@ import {
   getDoc,
   getDocs,
   query,
+  QueryDocumentSnapshot,
   where,
+  or,
 } from "firebase/firestore";
 
 class DialogController {
@@ -34,12 +36,16 @@ class DialogController {
     const user_id = req.params.id;
     const q = query(
       collection(database, "dialogs"),
-      where("user_id", "in", [user_id]),
-      where("user2_id", "==", user_id),
+      or(where("user_id", "==", user_id), where("user2_id", "==", user_id)),
     );
     const userSnapshot = await getDocs(q);
-    console.log(userSnapshot);
-    res.json(userSnapshot.size);
+    const dialogs: DocumentData[] = [];
+    if (!userSnapshot.empty) {
+      userSnapshot.forEach((dialog: QueryDocumentSnapshot<DocumentData>) => {
+        dialogs.push(dialog.data());
+      });
+    }
+    res.json(dialogs);
   }
 
   async getDialogs(req: Request, res: Response) {
