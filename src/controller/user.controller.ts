@@ -57,7 +57,7 @@ class UserController {
     const userList = await getDocs(collection(database, "users"));
     const users: DocumentData[] = [];
     userList.forEach((user) => {
-      users.push(user.data());
+      users.push({ ...user.data(), id: user.id });
     });
     if (userList) {
       res.json(users);

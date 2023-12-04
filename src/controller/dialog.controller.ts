@@ -42,7 +42,7 @@ class DialogController {
     const dialogs: DocumentData[] = [];
     if (!userSnapshot.empty) {
       userSnapshot.forEach((dialog: QueryDocumentSnapshot<DocumentData>) => {
-        dialogs.push(dialog.data());
+        dialogs.push({ ...dialog.data(), id: dialog.id });
       });
     }
     res.json(dialogs);
