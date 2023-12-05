@@ -125,14 +125,14 @@ class UserController {
               token,
             });
           } else {
-            res.json({
+            res.status(400).json({
               message: "неверный логин или пароль",
             });
           }
         });
       }
     } catch (err) {
-      res.json({
+      res.status(400).json({
         message: "неверный логин или пароль",
       });
     }
