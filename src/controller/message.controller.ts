@@ -6,6 +6,8 @@ type Message = {
   id: string;
   sender_id: string;
   messageText: string;
+  created: string;
+  updated: boolean;
 };
 
 class MessageController {
@@ -20,6 +22,7 @@ class MessageController {
         id: Math.random().toString(16).slice(2),
         sender_id,
         created: Date.now(),
+        updated: false,
       };
       messagesList.push(message);
       await setDoc(docRef, {
@@ -49,6 +52,7 @@ class MessageController {
       messages.forEach((message: Message) => {
         if (message.id === message_id && message.sender_id === sender_id) {
           message.messageText = messageText;
+          message.updated = true;
         }
       });
       await setDoc(docRef, {
@@ -65,6 +69,7 @@ class MessageController {
   }
   async deleteMessage(req: Request, res: Response) {
     const { message_id, dialog_id } = req.body;
+    console.log(message_id, dialog_id);
     try {
       const docRef = doc(database, "dialogs", dialog_id);
       const docSnap = await getDoc(docRef);
