@@ -41,13 +41,13 @@ class MessageController {
   }
 
   async updateMessage(req: Request, res: Response) {
-    const { messageText, dialog_id, message_id } = req.body;
+    const { messageText, sender_id, dialog_id, message_id } = req.body;
     const docRef = doc(database, "dialogs", dialog_id);
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
       const messages = docSnap.data().messages;
       messages.forEach((message: Message) => {
-        if (message.id === message_id) {
+        if (message.id === message_id && message.sender_id === sender_id) {
           message.messageText = messageText;
         }
       });
@@ -56,10 +56,12 @@ class MessageController {
         messages,
       });
     }
-    const newDocSnap = await getDoc(docRef);
     res.json({
-      ...newDocSnap.data(),
+      data: message_id,
     });
+    // res.status(404).json({
+    //   message: "такого сообщения не существует",
+    // });
   }
   async deleteMessage(req: Request, res: Response) {
     const { message_id, dialog_id } = req.body;
