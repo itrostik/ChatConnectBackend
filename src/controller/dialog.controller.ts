@@ -27,9 +27,7 @@ class DialogController {
       ...docSnap.data(),
       id: docRef.id,
     };
-    res.json({
-      dialog,
-    });
+    res.json(dialog);
   }
 
   async getDialogsByUserId(req: Request, res: Response) {
