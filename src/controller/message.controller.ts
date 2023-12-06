@@ -22,18 +22,11 @@ class MessageController {
         created: Date.now(),
       };
       messagesList.push(message);
-      const messageSnap = await setDoc(docRef, {
+      await setDoc(docRef, {
         ...docSnap.data(),
         messages: messagesList,
       });
-      const docSnapBuf = await getDoc(docRef);
-      const dialog = {
-        ...docSnapBuf.data(),
-        id: docRef.id,
-      };
-      res.json({
-        dialog,
-      });
+      res.json({ message });
     }
   }
 
