@@ -8,11 +8,12 @@ type Message = {
   messageText: string;
   created: string;
   updated: boolean;
+  imageUrl: string | null;
 };
 
 class MessageController {
   async createMessage(req: Request, res: Response) {
-    const { dialog_id, sender_id, messageText } = req.body;
+    const { dialog_id, sender_id, messageText, imageUrl } = req.body;
     const docRef = doc(database, "dialogs", dialog_id);
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
@@ -22,6 +23,7 @@ class MessageController {
         id: Math.random().toString(16).slice(2),
         sender_id,
         created: Date.now(),
+        imageUrl,
         updated: false,
       };
       messagesList.push(message);
@@ -44,7 +46,8 @@ class MessageController {
   }
 
   async updateMessage(req: Request, res: Response) {
-    const { messageText, sender_id, dialog_id, message_id } = req.body;
+    const { messageText, sender_id, dialog_id, message_id, imageUrl } =
+      req.body;
     const docRef = doc(database, "dialogs", dialog_id);
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
@@ -53,6 +56,7 @@ class MessageController {
         if (message.id === message_id && message.sender_id === sender_id) {
           message.messageText = messageText;
           message.updated = true;
+          message.imageUrl = imageUrl;
         }
       });
       await setDoc(docRef, {

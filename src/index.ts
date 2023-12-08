@@ -27,15 +27,16 @@ app.get("/", (req: Request, res: Response) => {
 app.post("/api/upload", upload.single("image"), async (req, res) => {
   const file = req.file;
   try {
+    if (!file) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
+    const formData = new FormData();
+    const blob = new Blob([file.buffer], { type: file.mimetype });
+    formData.append("image", blob);
     const imgBBResponse = await axios.post(
       "https://api.imgbb.com/1/upload",
+      formData,
       {
-        image: file?.buffer.toString("base64"),
-      },
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
         params: {
           key: imgAPIKey,
         },
@@ -45,6 +46,7 @@ app.post("/api/upload", upload.single("image"), async (req, res) => {
     res.json({ imageUrl });
   } catch (e) {
     console.error(e);
+    res.status(500).json(e);
   }
 });
 
