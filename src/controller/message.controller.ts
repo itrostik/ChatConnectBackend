@@ -9,6 +9,7 @@ type Message = {
   created: string;
   updated: boolean;
   imageUrl: string | null;
+  read: boolean;
 };
 
 class MessageController {
@@ -25,6 +26,7 @@ class MessageController {
         created: Date.now(),
         imageUrl,
         updated: false,
+        read: false,
       };
       messagesList.push(message);
       await setDoc(docRef, {
@@ -71,6 +73,28 @@ class MessageController {
     //   message: "такого сообщения не существует",
     // });
   }
+
+  async readMessage(req: Request, res: Response) {
+    const { dialog_id, message_id } = req.body;
+    const docRef = doc(database, "dialogs", dialog_id);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      const messages = docSnap.data().messages;
+      messages.forEach((message: Message) => {
+        if (message.id === message_id) {
+          message.read = true;
+        }
+      });
+      await setDoc(docRef, {
+        ...docSnap.data(),
+        messages,
+      });
+    }
+    res.json({
+      data: message_id,
+    });
+  }
+
   async deleteMessage(req: Request, res: Response) {
     const { message_id, dialog_id } = req.body;
     console.log(message_id, dialog_id);
