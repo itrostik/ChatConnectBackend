@@ -75,24 +75,26 @@ class MessageController {
   }
 
   async readMessage(req: Request, res: Response) {
-    const { dialog_id, message_id } = req.body;
-    const docRef = doc(database, "dialogs", dialog_id);
-    const docSnap = await getDoc(docRef);
-    if (docSnap.exists()) {
-      const messages = docSnap.data().messages;
-      messages.forEach((message: Message) => {
-        if (message.id === message_id) {
-          message.read = true;
-        }
-      });
-      await setDoc(docRef, {
-        ...docSnap.data(),
-        messages,
+    const { dialog_id, readMessages } = req.body;
+    if (readMessages) {
+      const docRef = doc(database, "dialogs", dialog_id);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        const messages = docSnap.data().messages;
+        messages.forEach((message: Message) => {
+          if (readMessages.includes(message.id)) {
+            message.read = true;
+          }
+        });
+        await setDoc(docRef, {
+          ...docSnap.data(),
+          messages,
+        });
+      }
+      res.json({
+        data: dialog_id,
       });
     }
-    res.json({
-      data: message_id,
-    });
   }
 
   async deleteMessage(req: Request, res: Response) {

@@ -10,6 +10,7 @@ messagesRoute.get(
 );
 messagesRoute.post("/messages", messageController.createMessage);
 messagesRoute.put("/messages", messageController.updateMessage);
+messagesRoute.patch("/messages", messageController.readMessage);
 messagesRoute.delete("/messages", messageController.deleteMessage);
 
 export default messagesRoute;
