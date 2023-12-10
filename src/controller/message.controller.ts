@@ -1,6 +1,12 @@
 import database from "../utils/database";
 import { Request, Response } from "express";
-import { getDoc, doc, setDoc } from "firebase/firestore";
+import {
+  getDoc,
+  doc,
+  setDoc,
+  runTransaction,
+  updateDoc,
+} from "firebase/firestore";
 
 type Message = {
   id: string;
@@ -14,26 +20,24 @@ type Message = {
 
 class MessageController {
   async createMessage(req: Request, res: Response) {
-    const { dialog_id, sender_id, messageText, imageUrl } = req.body;
+    const { newMessage, dialog_id } = req.body;
     const docRef = doc(database, "dialogs", dialog_id);
-    const docSnap = await getDoc(docRef);
-    if (docSnap.exists()) {
-      const messagesList = docSnap.data().messages;
-      const message = {
-        messageText,
-        id: Math.random().toString(16).slice(2),
-        sender_id,
-        created: Date.now(),
-        imageUrl,
-        updated: false,
-        read: false,
-      };
-      messagesList.push(message);
-      await setDoc(docRef, {
-        ...docSnap.data(),
-        messages: messagesList,
-      });
-      res.json({ message });
+    try {
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        const messagesList = [
+          ...docSnap.data().messages,
+          { ...newMessage, isLoading: false },
+        ];
+        await updateDoc(docRef, {
+          messages: messagesList,
+        });
+        res.json({ newMessage });
+      } else {
+        res.status(404).json("Document not found");
+      }
+    } catch (error) {
+      res.status(500).json(error);
     }
   }
 
@@ -86,8 +90,7 @@ class MessageController {
             message.read = true;
           }
         });
-        await setDoc(docRef, {
-          ...docSnap.data(),
+        await updateDoc(docRef, {
           messages,
         });
       }
