@@ -102,7 +102,6 @@ class MessageController {
 
   async deleteMessage(req: Request, res: Response) {
     const { message_id, dialog_id } = req.body;
-    console.log(message_id, dialog_id);
     try {
       const docRef = doc(database, "dialogs", dialog_id);
       const docSnap = await getDoc(docRef);
