@@ -12,6 +12,7 @@ import {
   where,
   deleteDoc,
   setDoc,
+  updateDoc,
 } from "firebase/firestore";
 import { getToken } from "../utils/jwt";
 
@@ -140,6 +141,21 @@ class UserController {
         message: "неверный логин или пароль",
       });
     }
+  }
+  async updateStatus(req: Request, res: Response) {
+    const { userId, online } = req.body;
+    const docRef = doc(database, "users", userId);
+
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      await updateDoc(docRef, {
+        online,
+        lastActive: Date.now(),
+      });
+    }
+    res.json({
+      data: userId,
+    });
   }
 }
 

@@ -10,5 +10,6 @@ usersRoute.post("/users", userController.createUser);
 usersRoute.put("/users", userController.updateUser);
 usersRoute.delete("/users/:id", userController.deleteUser);
 usersRoute.post("/users/check", userController.checkUser);
+usersRoute.patch("/users", userController.updateStatus);
 
 export default usersRoute;
